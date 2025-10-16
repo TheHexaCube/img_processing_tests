@@ -2,7 +2,7 @@ import os
 
 import sys
 
-from base.GUI import MainWindow
+from base.gui import MainWindow
 
 if __name__ == "__main__":
     main_window = MainWindow()
