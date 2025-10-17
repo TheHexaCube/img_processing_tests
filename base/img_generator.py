@@ -76,25 +76,20 @@ class ImageGenerator:
     @profile
     def generate_frames(self):
         frame_interval = 1.0 / self.framerate  # Time between frames in seconds
-        last_frame_time = time.perf_counter()
-        
+        next_frame_time = time.perf_counter()
+
         while self.running:
             frame_start_time = time.perf_counter()
-
             source_frame = self.generator
 
-           
-
-            frame_end_time = time.perf_counter()
-            
             # Store execution time thread-safely as a tuple
             with self.execution_times_lock:
+                frame_end_time = time.perf_counter()
                 self.execution_times.append((frame_start_time, frame_end_time))
                 self.last_execution_time = frame_end_time - frame_start_time
-            
-            #print(f"Frame generation execution time: {self.last_execution_time:.6f} seconds")
+
             self.frame_count += 1
-            
+
             # Store timestamp for FPS calculation
             current_time = time.time()
             with self.fps_timestamps_lock:
@@ -107,15 +102,18 @@ class ImageGenerator:
                 else:
                     bayer_pattern = self.bayer_pattern_2
                 self.frame_done_callback(bayer_pattern)
-            
-            # Frame rate control - wait until it's time for the next frame
-            elapsed_time = frame_end_time - last_frame_time
-            sleep_time = frame_interval - (time.perf_counter() - frame_start_time)
-            
+
+            # Calculate the next scheduled frame start time
+            next_frame_time += frame_interval
+            now = time.perf_counter()
+            sleep_time = next_frame_time - now
+
             if sleep_time > 0:
                 time.sleep(sleep_time)
+            else:
+                # If we are running behind, skip missed intervals
+                next_frame_time = now
             
-            last_frame_time = time.perf_counter()
 
     def get_frame(self):
         return self.frame

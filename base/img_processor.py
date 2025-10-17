@@ -63,9 +63,7 @@ class ImageProcessor:
                 # Store execution time thread-safely as a tuple
                 with self.execution_times_lock:
                     self.execution_times.append((start_time, end_time))
-                    self.last_execution_time = end_time - start_time
-                
-                #print(f"Image processing execution time: {self.last_execution_time:.6f} seconds")
+                    self.last_execution_time = end_time - start_time                
                 
                 # Store timestamp for FPS calculation
                 current_time = time.time()
